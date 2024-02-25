@@ -14,6 +14,23 @@ class AbstractDataFile(ABC):
     def display_info(self):
         pass
 
+    def list_files_with_customer_code(files_list):
+        files_with_customer_code = []
+        files_without_customer_code = []
+
+        for file_name in files_list:
+            file_path = os.path.join(input_folder, file_name)
+
+            csv_file = CSVDataFile(file_path)
+            csv_file.read_file()
+            csv_file.display_info()
+
+            if 'CUSTOMER_CODE' in csv_file.fields:
+                files_with_customer_code.append(csv_file)
+            else:
+                files_without_customer_code.append(csv_file)
+
+        return files_with_customer_code, files_without_customer_code
 
 class CSVDataFile(AbstractDataFile):
 
