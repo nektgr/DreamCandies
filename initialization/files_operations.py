@@ -33,4 +33,3 @@ def copy_files_to_output(files_list, exclude_file, input_folder, output_folder, 
     except Exception as e:
         print(f"Error copying files: {e}")
 
-

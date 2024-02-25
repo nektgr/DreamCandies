@@ -44,12 +44,37 @@ def main():
     for x in desired_customers_code:
         for element in x:
             flattened_desired_customers.append(element)
-  
+    #print(flattened_desired_customers)
 
-    for x in files_with_customer_code:
-        filtered_data = [row for row in x.data if row[0] in flattened_desired_customers]
+    #for x in files_with_customer_code:
+    #    print(x.data)
+    for file_with_customer_code in files_with_customer_code:
+        print("Original Data:", file_with_customer_code.file_path)
 
-    #filtered_Data now contains only the desired files
+        # Filter data based on 'CUSTOMER_CODE' matching desired_list
+        filtered_data = [row for row in file_with_customer_code.data if row[0] in flattened_desired_customers]
+
+        # Save filtered data to the output folder with double quotes
+        output_file_name = prefix + os.path.basename(file_with_customer_code.file_path)
+        output_file_path = os.path.join(output_folder, output_file_name)
+
+        with open(output_file_path, 'w', encoding='utf-8') as output_file:
+            # Write header with double quotes
+            output_file.write('"' + '","'.join(file_with_customer_code.fields) + '"\n')
+            
+            # Write filtered data with double quotes
+            for row in filtered_data:
+                output_file.write('"' + '","'.join(row) + '"\n')
+
+        print(f"Filtered data saved to '{output_file_path}'.")
+
+
+
+
+        #based on the input from the user he will state ["unmatched datafile",'file to be matched with','keyvalue']
+        
+        for x in files_without_customer_code:
+            print(x.data)
 
 if __name__ == "__main__":
     main()
