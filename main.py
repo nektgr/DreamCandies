@@ -15,17 +15,15 @@ def main():
     3. Filter data based on customer codes.
     4. Filter data that do not have customer codes based number 3 result.
 
-    Note: Modify folder_path, exclude_file, input_folder,output_folder and match_conditions as needed.
+    Note: Modify input_folder, exclude_file,output_folder and match_conditions as needed.
     """
-    folder_path = "input_files"  # You can change this to your desired folder path
-    exclude_file = "CUSTOMER_SAMPLE.CSV"  # Specify the file to be excluded
     input_folder = "input_files" 
     output_folder = "output_files"
     prefix = "SMALL_"
     #Insert in match_conditions a list of [File to be Matched, File to match with, keyvalue] 
     match_conditions=[[f'{input_folder}/INVOICE_ITEM.csv',f'{output_folder}/{prefix}INVOICE.csv','INVOICE_CODE']]
     # Get the list of files in the folder
-    files_list = list_files_in_folder(folder_path)
+    files_list = list_files_in_folder(input_folder)
     #files_without_customer_code is not used for now but migth used in the future
     files_with_customer_code, files_without_customer_code,desired_customers_code = list_files_with_customer_code(files_list,input_folder)
 

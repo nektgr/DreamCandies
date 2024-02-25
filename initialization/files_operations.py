@@ -11,7 +11,7 @@ from entities.abstract_file import CSVDataFile
 
 logging.basicConfig(filename='logfile.log', level=logging.INFO)
 
-def list_files_in_folder(folder_path,exclude_file=None):
+def list_files_in_folder(folder_path):
     """
     List files in the specified folder, excluding a specific file if provided.
 
@@ -27,7 +27,7 @@ def list_files_in_folder(folder_path,exclude_file=None):
         files = os.listdir(folder_path)
         
         # Filter out subdirectories, if any
-        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file)) and file != exclude_file]
+        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file))]
         
         return files
     except FileNotFoundError as e:
@@ -59,7 +59,6 @@ def list_files_with_customer_code(files_list,input_folder):
             
 
                 if file_name == 'CUSTOMER_SAMPLE.CSV':
-                    print("true") 
                     desired_customers.extend(csv_file.data)
                     
 
@@ -134,6 +133,8 @@ def filter_data_based_on_customercode(files_with_customer_code,flattened_desired
         - output_folder (str): Folder to save filtered data.
         """
         for file_with_customer_code in files_with_customer_code:
+            if file_with_customer_code.file_path == "input_files\CUSTOMER_SAMPLE.CSV":
+                continue
             #Filter data based on 'CUSTOMER_CODE' matching desired_list
             filtered_data = [row for row in file_with_customer_code.data if row[0] in flattened_desired_customers]
             # Save filtered data to the output folder with double quotes
