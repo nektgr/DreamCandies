@@ -1,5 +1,5 @@
 import os
-from initialization.files_operations import list_files_in_folder,copy_files_to_output
+from initialization.files_operations import filter_data_based_on_keyvalue, list_files_in_folder,copy_files_to_output
 from entities.Abstract_file import CSVDataFile
 
 def list_files_with_customer_code(files_list,input_folder):
@@ -51,20 +51,20 @@ def main():
     for file_with_customer_code in files_with_customer_code:
         print("Original Data:", file_with_customer_code.file_path)
 
-        # Filter data based on 'CUSTOMER_CODE' matching desired_list
+    #    Filter data based on 'CUSTOMER_CODE' matching desired_list
         filtered_data = [row for row in file_with_customer_code.data if row[0] in flattened_desired_customers]
 
-        # Save filtered data to the output folder with double quotes
+    # Save filtered data to the output folder with double quotes
         output_file_name = prefix + os.path.basename(file_with_customer_code.file_path)
         output_file_path = os.path.join(output_folder, output_file_name)
 
         with open(output_file_path, 'w', encoding='utf-8') as output_file:
             # Write header with double quotes
-            output_file.write('"' + '","'.join(file_with_customer_code.fields) + '"\n')
-            
+            output_file.write('“' + '”,“'.join(file_with_customer_code.fields) + '”\n')
+
             # Write filtered data with double quotes
             for row in filtered_data:
-                output_file.write('"' + '","'.join(row) + '"\n')
+                output_file.write(','.join('“' + value + '”' for value in row) + '\n')
 
         print(f"Filtered data saved to '{output_file_path}'.")
 
@@ -73,8 +73,9 @@ def main():
 
         #based on the input from the user he will state ["unmatched datafile",'file to be matched with','keyvalue']
         
-        for x in files_without_customer_code:
-            print(x.data)
+    match_conditions=[[f'{input_folder}/INVOICE_ITEM.csv',f'{output_folder}/{prefix}INVOICE.csv','INVOICE_CODE']]
+    for condition in match_conditions:
+        filter_data_based_on_keyvalue(condition[0], condition[1], condition[2], output_folder, prefix, file_with_customer_code)
 
 if __name__ == "__main__":
     main()
