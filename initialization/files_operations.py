@@ -11,7 +11,7 @@ from entities.abstract_file import CSVDataFile
 
 logging.basicConfig(filename='logfile.log', level=logging.INFO)
 
-def list_files_in_folder(folder_path,exclude_file):
+def list_files_in_folder(folder_path,exclude_file=None):
     """
     List files in the specified folder, excluding a specific file if provided.
 
@@ -58,7 +58,8 @@ def list_files_with_customer_code(files_list,input_folder):
                 csv_file.read_file()
             
 
-                if file_name== 'CUSTOMER_SAMPLE.CSV': 
+                if file_name == 'CUSTOMER_SAMPLE.CSV':
+                    print("true") 
                     desired_customers.extend(csv_file.data)
                     
 
@@ -73,7 +74,6 @@ def list_files_with_customer_code(files_list,input_folder):
         for x in desired_customers:
             for element in x:
                 desired_customers_code.append(element)
-        
         return files_with_customer_code, files_without_customer_code,desired_customers_code
 
 def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyvalue, output_folder,prefix):
