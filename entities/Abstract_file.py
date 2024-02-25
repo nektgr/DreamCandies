@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+import logging
 
+logging.basicConfig(filename='logfile.log', level=logging.INFO)
 class AbstractDataFile(ABC):
     """
     Abstract base class representing a generic data file. Subclasses must implement
@@ -40,15 +42,18 @@ class CSVDataFile(AbstractDataFile):
         Implementation of read_file for CSVDataFile. Reads data from the CSV file and populates
         the fields and data attributes.
         """
-        with open(self.file_path, 'r', encoding='utf-8') as file:
-        # Assuming the first line contains the heading
-            heading = file.readline().strip().split(',')
-            self.fields = [field.strip('“”') for field in heading]  # Strip double quotes
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as file:
+            # Assuming the first line contains the heading
+                heading = file.readline().strip().split(',')
+                self.fields = [field.strip('“”') for field in heading]  # Strip double quotes
 
-        # Read the rest of the lines as data
-            for line in file:
-                data_row = line.strip().split(',')
-                self.data.append([value.strip('“”') for value in data_row])  # Strip double quotes
+            # Read the rest of the lines as data
+                for line in file:
+                    data_row = line.strip().split(',')
+                    self.data.append([value.strip('“”') for value in data_row])  # Strip double quotes
+        except Exception as e:
+            logging.error(f"Error reading file '{self.file_path}': {str(e)}")
 
     def display_info(self):
         """

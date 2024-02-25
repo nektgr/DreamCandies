@@ -1,7 +1,9 @@
 import os
 from entities.Abstract_file import CSVDataFile
+import logging
 
-def list_files_in_folder(folder_path):
+logging.basicConfig(filename='logfile.log', level=logging.INFO)
+def list_files_in_folder(folder_path,exclude_file):
     """
     List files in the specified folder.
 
@@ -16,11 +18,11 @@ def list_files_in_folder(folder_path):
         files = os.listdir(folder_path)
         
         # Filter out subdirectories, if any
-        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file))]
+        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file)) and file != exclude_file]
         
         return files
-    except FileNotFoundError:
-        print(f"Error: Folder '{folder_path}' not found.")
+    except FileNotFoundError as e:
+        logging.error(f"Error: {str(e)}")
         return []
     
 def list_files_with_customer_code(files_list,input_folder):
@@ -38,21 +40,32 @@ def list_files_with_customer_code(files_list,input_folder):
         """
         files_with_customer_code = []
         files_without_customer_code = []
+        desired_customers=[]
         desired_customers_code=[]
         for file_name in files_list:
             file_path = os.path.join(input_folder, file_name)
 
-            csv_file = CSVDataFile(file_path)
-            csv_file.read_file()
+            try:
+                csv_file = CSVDataFile(file_path)
+                csv_file.read_file()
+            
 
-            if file_name== 'CUSTOMER_SAMPLE.CSV': 
-                desired_customers_code.extend(csv_file.data)
+                if file_name== 'CUSTOMER_SAMPLE.CSV': 
+                    desired_customers.extend(csv_file.data)
+                    
 
-            if 'CUSTOMER_CODE' in csv_file.fields:
-                files_with_customer_code.append(csv_file)
-            else:
-                files_without_customer_code.append(csv_file)
+                if 'CUSTOMER_CODE' in csv_file.fields:
+                    files_with_customer_code.append(csv_file)
+                else:
+                    files_without_customer_code.append(csv_file)
 
+            except Exception as e:
+                logging.error(f"Error processing file '{file_path}': {str(e)}")
+        #Modified the desired customer in order to get the codes in a single flattened list
+        for x in desired_customers:
+            for element in x:
+                desired_customers_code.append(element)
+        
         return files_with_customer_code, files_without_customer_code,desired_customers_code
 
 def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyvalue, output_folder,prefix):
@@ -86,18 +99,20 @@ def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyval
             # Save filtered data to the output folder
             output_file_name = f"{prefix}{os.path.basename(unmatched_file_path)}"
             output_file_path = os.path.join(output_folder, output_file_name)
+            try:
+                with open(output_file_path, 'w', encoding='utf-8') as output_file:
+                    # Write header with double quotes
+                    output_file.write('“' + '”,“'.join(unmatched_file.fields) + '”\n')
 
-            with open(output_file_path, 'w', encoding='utf-8') as output_file:
-                # Write header with double quotes
-                output_file.write('“' + '”,“'.join(unmatched_file.fields) + '”\n')
+                    # Write filtered data with douvle quotes
+                    for row in filtered_data:
+                        output_file.write(','.join(['“' + value + '”' for value in row]) + '\n')
 
-                # Write filtered data with douvle quotes
-                for row in filtered_data:
-                    output_file.write(','.join(['“' + value + '”' for value in row]) + '\n')
-
-            print(f"Filtered data saved to '{output_file_path}'.")
+                logging.info(f"Filtered data saved to '{output_file_path}'.")
+            except Exception as e:
+                logging.error(f"Error writing to file '{output_file_path}': {str(e)}")
         else:
-            print(f"Keyvalue '{keyvalue}' not found in both files. Unable to apply matching condition.")
+            logging.info(f"Keyvalue '{keyvalue}' not found in both files.{unmatched_file_path} {matched_file_path}Unable to apply matching condition.")
 
 def filter_data_based_on_customercode(files_with_customer_code,flattened_desired_customers,prefix,output_folder):
         """
@@ -110,21 +125,22 @@ def filter_data_based_on_customercode(files_with_customer_code,flattened_desired
         - output_folder (str): Folder to save filtered data.
         """
         for file_with_customer_code in files_with_customer_code:
-        #    Filter data based on 'CUSTOMER_CODE' matching desired_list
+            #Filter data based on 'CUSTOMER_CODE' matching desired_list
             filtered_data = [row for row in file_with_customer_code.data if row[0] in flattened_desired_customers]
-        # Save filtered data to the output folder with double quotes
+            # Save filtered data to the output folder with double quotes
             output_file_name = prefix + os.path.basename(file_with_customer_code.file_path)
             output_file_path = os.path.join(output_folder, output_file_name)
+            try:
+                with open(output_file_path, 'w', encoding='utf-8') as output_file:
+                    # Write header with double quotes
+                    output_file.write('“' + '”,“'.join(file_with_customer_code.fields) + '”\n')
 
-            with open(output_file_path, 'w', encoding='utf-8') as output_file:
-                # Write header with double quotes
-                output_file.write('“' + '”,“'.join(file_with_customer_code.fields) + '”\n')
+                    # Write filtered data with double quotes
+                    for row in filtered_data:
+                        output_file.write(','.join('“' + value + '”' for value in row) + '\n')
 
-                # Write filtered data with double quotes
-                for row in filtered_data:
-                    output_file.write(','.join('“' + value + '”' for value in row) + '\n')
-
-            print(f"Filtered data saved to '{output_file_path}'.")
-
+                logging.info(f"Filtered data saved to '{output_file_path}'.")
+            except Exception as e:
+                logging.error(f"Error writing to file '{output_file_path}': {str(e)}")
  
     
