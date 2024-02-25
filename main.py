@@ -1,5 +1,6 @@
+import os
 from initialization.files_operations import list_files_in_folder,copy_files_to_output
-
+from entities.Abstract_file import CSVDataFile
 
 def main():
     folder_path = "input_files"  # You can change this to your desired folder path
@@ -12,7 +13,13 @@ def main():
     files_list = list_files_in_folder(folder_path)
 
     # Copy the files to the output folder (excluding specified file) with prefix 'SMALL_'
-    copy_files_to_output(files_list, exclude_file, input_folder, output_folder, prefix)
+    #copy_files_to_output(files_list, exclude_file, input_folder, output_folder, prefix)
+    for file_name in files_list:
+        file_path = os.path.join(input_folder, file_name)
+
+        csv_file = CSVDataFile(file_path)
+        csv_file.read_file()
+        csv_file.display_info()
 
 if __name__ == "__main__":
     main()

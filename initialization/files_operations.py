@@ -1,4 +1,3 @@
-# file_operations.py
 import os
 
 def list_files_in_folder(folder_path):
@@ -33,3 +32,5 @@ def copy_files_to_output(files_list, exclude_file, input_folder, output_folder, 
         print(f"Files copied from '{input_folder}' to '{output_folder}' (excluding '{exclude_file}') with '{prefix}' prefix.")
     except Exception as e:
         print(f"Error copying files: {e}")
+
+
