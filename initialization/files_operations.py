@@ -2,6 +2,15 @@ import os
 from entities.Abstract_file import CSVDataFile
 
 def list_files_in_folder(folder_path):
+    """
+    List files in the specified folder.
+
+    Parameters:
+    - folder_path (str): Path to the folder.
+
+    Returns:
+    - list: List of files in the folder.
+    """
     try:
         # Get the list of files in the specified folder
         files = os.listdir(folder_path)
@@ -13,37 +22,57 @@ def list_files_in_folder(folder_path):
     except FileNotFoundError:
         print(f"Error: Folder '{folder_path}' not found.")
         return []
+    
+def list_files_with_customer_code(files_list,input_folder):
+        """
+        Extracts files with 'CUSTOMER_CODE' field from the given list of files.
 
-def copy_files_to_output(files_list, exclude_file, input_folder, output_folder, prefix):
-    try:
-        # Create the output folder if it doesn't exist
-        os.makedirs(output_folder, exist_ok=True)
+        Parameters:
+        - files_list (list): List of file names.
+        - input_folder (str): Path to the input folder.
 
-        # Copy each file from the input folder to the output folder (excluding specified file)
+        Returns:
+        - files_with_customer_code (list): List of CSVDataFile objects with 'CUSTOMER_CODE' field.
+        - files_without_customer_code (list): List of CSVDataFile objects without 'CUSTOMER_CODE' field.
+        - desired_customers_code (list): List of desired customers' data from 'CUSTOMER_SAMPLE.CSV'.
+        """
+        files_with_customer_code = []
+        files_without_customer_code = []
+        desired_customers_code=[]
         for file_name in files_list:
-            if file_name != exclude_file:
-                source_path = os.path.join(input_folder, file_name)
-                destination_name = prefix + file_name
-                destination_path = os.path.join(output_folder, destination_name)
+            file_path = os.path.join(input_folder, file_name)
 
-                with open(source_path, 'rb') as source_file, open(destination_path, 'wb') as destination_file:
-                    # Read content from source file and write it to destination file
-                    destination_file.write(source_file.read())
+            csv_file = CSVDataFile(file_path)
+            csv_file.read_file()
 
-        print(f"Files copied from '{input_folder}' to '{output_folder}' (excluding '{exclude_file}') with '{prefix}' prefix.")
-    except Exception as e:
-        print(f"Error copying files: {e}")
+            if file_name== 'CUSTOMER_SAMPLE.CSV': 
+                desired_customers_code.extend(csv_file.data)
 
-def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyvalue, output_folder,prefix,file_with_customer_code):
+            if 'CUSTOMER_CODE' in csv_file.fields:
+                files_with_customer_code.append(csv_file)
+            else:
+                files_without_customer_code.append(csv_file)
+
+        return files_with_customer_code, files_without_customer_code,desired_customers_code
+
+def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyvalue, output_folder,prefix):
+        """
+        Filter data in unmatched_file based on matching keyvalue in matched_file.
+
+        Parameters:
+        - unmatched_file_path (str): Path to the unmatched datafile.
+        - matched_file_path (str): Path to the file to be matched with.
+        - keyvalue (str): Keyvalue to match on.
+        - output_folder (str): Folder to save filtered data.
+        - prefix (str): Prefix for the output file name.
+        """
         # Read data from the unmatched datafile
         unmatched_file = CSVDataFile(unmatched_file_path)
         unmatched_file.read_file()
-        print(unmatched_file.fields)
 
         # Read data from the file to be matched with
         matched_file = CSVDataFile(matched_file_path)
         matched_file.read_file()
-        print(matched_file.fields)
 
         # Check if the keyvalue exists in both files
         if keyvalue in unmatched_file.fields and keyvalue in matched_file.fields:
@@ -60,7 +89,7 @@ def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyval
 
             with open(output_file_path, 'w', encoding='utf-8') as output_file:
                 # Write header with double quotes
-                output_file.write('“' + '”,“'.join(file_with_customer_code.fields) + '”\n')
+                output_file.write('“' + '”,“'.join(unmatched_file.fields) + '”\n')
 
                 # Write filtered data with douvle quotes
                 for row in filtered_data:
@@ -69,6 +98,33 @@ def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyval
             print(f"Filtered data saved to '{output_file_path}'.")
         else:
             print(f"Keyvalue '{keyvalue}' not found in both files. Unable to apply matching condition.")
+
+def filter_data_based_on_customercode(files_with_customer_code,flattened_desired_customers,prefix,output_folder):
+        """
+        Filter data in files_with_customer_code based on 'CUSTOMER_CODE' matching desired_list.
+
+        Parameters:
+        - files_with_customer_code (list): List of CSVDataFile instances.
+        - flattened_desired_customers (list): List of desired customer codes.
+        - prefix (str): Prefix for the output file name.
+        - output_folder (str): Folder to save filtered data.
+        """
+        for file_with_customer_code in files_with_customer_code:
+        #    Filter data based on 'CUSTOMER_CODE' matching desired_list
+            filtered_data = [row for row in file_with_customer_code.data if row[0] in flattened_desired_customers]
+        # Save filtered data to the output folder with double quotes
+            output_file_name = prefix + os.path.basename(file_with_customer_code.file_path)
+            output_file_path = os.path.join(output_folder, output_file_name)
+
+            with open(output_file_path, 'w', encoding='utf-8') as output_file:
+                # Write header with double quotes
+                output_file.write('“' + '”,“'.join(file_with_customer_code.fields) + '”\n')
+
+                # Write filtered data with double quotes
+                for row in filtered_data:
+                    output_file.write(','.join('“' + value + '”' for value in row) + '\n')
+
+            print(f"Filtered data saved to '{output_file_path}'.")
 
  
     
