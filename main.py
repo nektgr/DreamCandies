@@ -1,7 +1,22 @@
+"""
+Main script for executing the DreamCandies File Tool.
+
+This script orchestrates the process of filtering and matching data files for the DreamCandies project.
+"""
 from initialization.files_operations import filter_data_based_on_customercode, filter_data_based_on_keyvalue, list_files_in_folder, list_files_with_customer_code
 
-
 def main():
+    """
+    Main function to execute the DreamCandies File Tool.
+
+    It performs the following steps:
+    1. List files in the specified folder.
+    2. Extract files with 'CUSTOMER_CODE' field.
+    3. Filter data based on customer codes.
+    4. Filter data that do not have customer codes based number 3 result.
+
+    Note: Modify folder_path, exclude_file, input_folder,output_folder and match_conditions as needed.
+    """
     folder_path = "input_files"  # You can change this to your desired folder path
     exclude_file = "CUSTOMER_SAMPLE.CSV"  # Specify the file to be excluded
     input_folder = "input_files" 

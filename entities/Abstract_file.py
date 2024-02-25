@@ -1,3 +1,6 @@
+"""
+Module containing an abstract base class for representing a generic data file.
+"""
 from abc import ABC, abstractmethod
 import logging
 

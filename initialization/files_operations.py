@@ -1,14 +1,23 @@
+"""
+Module for file operations in the DreamCandies File Tool.
+
+This module provides functions for listing files, extracting files with 'CUSTOMER_CODE' field,
+filtering data based on customer codes, and matching data based on key-value conditions.
+"""
 import os
-from entities.Abstract_file import CSVDataFile
 import logging
 
+from entities.abstract_file import CSVDataFile
+
 logging.basicConfig(filename='logfile.log', level=logging.INFO)
+
 def list_files_in_folder(folder_path,exclude_file):
     """
-    List files in the specified folder.
+    List files in the specified folder, excluding a specific file if provided.
 
     Parameters:
     - folder_path (str): Path to the folder.
+    - exclude_file (str): File name to be excluded.
 
     Returns:
     - list: List of files in the folder.
@@ -27,12 +36,11 @@ def list_files_in_folder(folder_path,exclude_file):
     
 def list_files_with_customer_code(files_list,input_folder):
         """
-        Extracts files with 'CUSTOMER_CODE' field from the given list of files.
+        Extract files with 'CUSTOMER_CODE' field from the given list of files.
 
         Parameters:
         - files_list (list): List of file names.
         - input_folder (str): Path to the input folder.
-
         Returns:
         - files_with_customer_code (list): List of CSVDataFile objects with 'CUSTOMER_CODE' field.
         - files_without_customer_code (list): List of CSVDataFile objects without 'CUSTOMER_CODE' field.
@@ -113,7 +121,8 @@ def filter_data_based_on_keyvalue(unmatched_file_path, matched_file_path, keyval
                 logging.error(f"Error writing to file '{output_file_path}': {str(e)}")
         else:
             logging.info(f"Keyvalue '{keyvalue}' not found in both files.{unmatched_file_path} {matched_file_path}Unable to apply matching condition.")
-
+            raise ValueError(f"Keyvalue '{keyvalue}' not found in both files: {unmatched_file_path} and {matched_file_path}. Unable to apply matching condition.")
+        
 def filter_data_based_on_customercode(files_with_customer_code,flattened_desired_customers,prefix,output_folder):
         """
         Filter data in files_with_customer_code based on 'CUSTOMER_CODE' matching desired_list.
